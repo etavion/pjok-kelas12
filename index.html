@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kuis PJOK Kelas 1</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f9f9f9;
+        padding: 15px;
+    }
+    .container {
+        max-width: 750px;
+        margin: auto;
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 0px 10px #ccc;
+    }
+    h1 { text-align: center; }
+    button {
+        width: 100%;
+        padding: 12px;
+        background: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 18px;
+        margin-top: 10px;
+    }
+    .hidden { display: none; }
+    .question {
+        background: #eef3ff;
+        padding: 12px;
+        margin-bottom: 10px;
+        border-radius: 8px;
+    }
+    .correct { background: #d7ffd7 !important; }
+    .wrong { background: #ffd6d6 !important; }
+
+    #timer { 
+        font-size: 20px;
+        font-weight: bold; 
+        text-align: center; 
+        margin-bottom: 10px;
+    }
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<h1>Kuis PJOK Kelas 1 🏃</h1>
+
+<button id="startBtn">Mulai Kuis</button>
+
+<div id="timer" class="hidden">⏳ Waktu: <span id="time">20:00</span></div>
+
+<form id="quizForm" class="hidden"></form>
+
+<button id="submitBtn" class="hidden">Selesai</button>
+
+<div id="result" class="hidden"></div>
+
+</div>
+
+<script>
+const questions = [
+    {q:"Gerak lokomotor adalah gerak yang dilakukan dengan…", a:["Diam","Berpindah tempat","Tidur"], c:1},
+    {q:"Yang termasuk gerak lokomotor adalah…", a:["Duduk","Berjalan","Menekuk"], c:1},
+    {q:"Berlari termasuk gerak…", a:["Lokomotor","Non lokomotor","Manipulatif"], c:0},
+    {q:"Bergerak ke samping disebut…", a:["Bergeser","Memutar","Menekuk"], c:0},
+    {q:"Melompat dilakukan dengan…", a:["Kepala","Tangan","Kaki"], c:2},
+
+    {q:"Berjalan dilakukan dengan langkah…", a:["Pelan","Diam","Tidur"], c:0},
+    {q:"Saat berlari tubuh bergerak lebih…", a:["Lambat","Cepat","Diam"], c:1},
+    {q:"Melompat dilakukan di atas…", a:["Air","Tanah","Awan"], c:1},
+    {q:"Bergerak bergeser dilakukan ke…", a:["Depan","Samping","Atas"], c:1},
+    {q:"Berjalan mundur berarti ke arah…", a:["Depan","Belakang","Samping"], c:1},
+
+    {q:"Gerak non lokomotor berarti…", a:["Pindah tempat","Tidak pindah tempat","Tidur"], c:1},
+    {q:"Menekuk tangan termasuk gerak…", a:["Lokomotor","Non lokomotor","Manipulatif"], c:1},
+    {q:"Meliuk dilakukan dengan…", a:["Kaki","Badan","Telinga"], c:1},
+    {q:"Memutar badan dilakukan tanpa…", a:["Pindah tempat","Bergerak","Mengangkat tangan"], c:0},
+    {q:"Mengayun tangan dilakukan saat…", a:["Tidur","Berjalan","Diam"], c:1},
+
+    {q:"Gerak manipulatif dilakukan menggunakan…", a:["Benda","Tidur","Diam"], c:0},
+    {q:"Menangkap bola menggunakan…", a:["Kaki","Tangan","Kepala"], c:1},
+    {q:"Melempar bola dilakukan dengan…", a:["Tangan","Perut","Kaki"], c:0},
+    {q:"Menendang bola menggunakan…", a:["Kaki","Tangan","Mulut"], c:0},
+    {q:"Memukul bola memakai…", a:["Raket","Sapu","Buku"], c:0},
+
+    {q:"Bertumpu berarti menahan tubuh dengan…", a:["Piring","Anggota tubuh","Kursi"], c:1},
+    {q:"Contoh gerak bertumpu adalah…", a:["Berdiri satu kaki","Merangkak","Tidur"], c:0},
+    {q:"Keseimbangan berarti tubuh tidak…", a:["Jatuh","Berjalan","Duduk"], c:0},
+    {q:"Senam lantai dilakukan di atas…", a:["Rumput","Matras","Jalan"], c:1},
+    {q:"Berpindah tempat dalam senam dilakukan dengan…", a:["Merangkak","Duduk","Tidur"], c:0},
+
+    {q:"Berdiri satu kaki melatih…", a:["Keseimbangan","Tidur","Lari cepat"], c:0},
+    {q:"Memutar tangan termasuk…", a:["Non lokomotor","Lokomotor","Tidur"], c:0},
+    {q:"Memutar badan dilakukan dengan…", a:["Lengan","Badan","Rambut"], c:1},
+    {q:"Saat berjalan mundur harus…", a:["Menutup mata","Melihat belakang","Diam"], c:1},
+    {q:"Lompat kecil berulang disebut…", a:["Melayang","Melompat","Mengambang"], c:1},
+];
+
+const startBtn = document.getElementById("startBtn");
+const quizForm = document.getElementById("quizForm");
+const submitBtn = document.getElementById("submitBtn");
+const result = document.getElementById("result");
+const timer = document.getElementById("timer");
+
+let timeLeft = 1200; 
+
+startBtn.onclick = () => {
+    startBtn.classList.add("hidden");
+    quizForm.classList.remove("hidden");
+    submitBtn.classList.remove("hidden");
+    timer.classList.remove("hidden");
+    loadQuestions();
+    startTimer();
+};
+
+function loadQuestions() {
+    questions.forEach((q, i) => {
+        const div = document.createElement("div");
+        div.className = "question";
+        div.innerHTML = `
+            <p><b>${i+1}. ${q.q}</b></p>
+            ${q.a.map((opt, idx)=>
+                `<label><input type="radio" name="q${i}" value="${idx}"> ${opt}</label><br>`).join("")}
+        `;
+        quizForm.appendChild(div);
+    });
+}
+
+function startTimer() {
+    const t = setInterval(() => {
+        const m = Math.floor(timeLeft / 60);
+        const s = timeLeft % 60;
+        document.getElementById("time").textContent = `${m}:${s.toString().padStart(2,"0")}`;
+        timeLeft--;
+
+        if (timeLeft < 0) {
+            clearInterval(t);
+            finishQuiz();
+        }
+    }, 1000);
+}
+
+submitBtn.onclick = finishQuiz;
+
+function finishQuiz() {
+    let score = 0;
+
+    document.querySelectorAll(".question").forEach((qDiv, i) => {
+        const answer = document.querySelector(`input[name="q${i}"]:checked`);
+        const correct = questions[i].c;
+
+        if (answer && Number(answer.value) === correct) {
+            qDiv.classList.add("correct");
+            score++;
+        } else {
+            qDiv.classList.add("wrong");
+        }
+    });
+
+    result.classList.remove("hidden");
+    result.innerHTML = `<h2>Nilai kamu: ${Math.round(score * 100 / questions.length)}</h2>`;
+    submitBtn.disabled = true;
+}
+</script>
+
+</body>
+</html>
